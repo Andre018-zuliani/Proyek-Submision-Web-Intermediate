@@ -26,13 +26,11 @@ export default class NewPage {
           </div>
         </div>
       </section>
-  
       <section class="container">
         <div class="new-form__container">
           <form id="new-form" class="new-form">
             <div class="form-control">
               <label for="title-input" class="new-form__title__title">Judul Story</label>
-  
               <div class="new-form__title__container">
                 <input
                   id="title-input"
@@ -45,7 +43,6 @@ export default class NewPage {
             </div>
             <div class="form-control">
               <div class="new-form__damage-level__title">Tingkat Kerusakan</div>
-  
               <div class="new-form__damage-level__container">
                 <div class="new-form__damage-level__minor__container">
                   <input id="damage-level-minor-input" type="radio" name="damageLevel" value="minor">
@@ -78,7 +75,6 @@ export default class NewPage {
             </div>
             <div class="form-control">
               <label for="description-input" class="new-form__description__title">Keterangan</label>
-  
               <div class="new-form__description__container">
                 <textarea
                   id="description-input"
@@ -90,7 +86,6 @@ export default class NewPage {
             <div class="form-control">
               <label for="documentations-input" class="new-form__documentations__title">Dokumentasi</label>
               <div id="documentations-more-info">Anda dapat menyertakan foto sebagai dokumentasi.</div>
-  
               <div class="new-form__documentations__container">
                 <div class="new-form__documentations__buttons">
                   <button id="documentations-input-button" class="btn btn-outline" type="button">
@@ -115,7 +110,6 @@ export default class NewPage {
                     Video stream not available.
                   </video>
                   <canvas id="camera-canvas" class="new-form__camera__canvas"></canvas>
-  
                   <div class="new-form__camera__tools">
                     <select id="camera-select"></select>
                     <div class="new-form__camera__tools_buttons">
@@ -128,35 +122,29 @@ export default class NewPage {
                 <ul id="documentations-taken-list" class="new-form__documentations__outputs"></ul>
               </div>
             </div>
-    <section class="container">
-      <div class="new-form__container">
-        <form id="new-form" class="new-form">
-          <!-- ...kode lainnya disembunyikan... -->
- 
-          <div class="form-control">
-            <div class="new-form__location__title">Lokasi</div>
- 
-            <div class="new-form__location__container">
-              <div class="new-form__location__map__container">
-                <div id="map" class="new-form__location__map"></div>
-                <div id="map-loading-container"></div>
-              </div>
-              <div class="new-form__location__lat-lng">
-                <input type="number" name="latitude" value="-6.175389" disabled>
-                <input type="number" name="longitude" value="106.827139" disabled>
+            <div class="form-control">
+              <div class="new-form__location__title">Lokasi</div>
+              <div class="new-form__location__container">
+                <div class="new-form__location__map__container">
+                  <div id="map" class="new-form__location__map"></div>
+                  <div id="map-loading-container"></div>
+                </div>
+                <div class="new-form__location__lat-lng">
+                  <input type="number" name="latitude" value="-6.175389" disabled>
+                  <input type="number" name="longitude" value="106.827139" disabled>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-buttons">
-            <span id="submit-button-container">
-              <button class="btn" type="submit">Buat Laporan</button>
-            </span>
-            <a class="btn btn-outline" href="#/">Batal</a>
-          </div>
-        </form>
-      </div>
-    </section>
-  `;
+            <div class="form-buttons">
+              <span id="submit-button-container">
+                <button class="btn" type="submit">Buat Laporan</button>
+              </span>
+              <a class="btn btn-outline" href="#/">Batal</a>
+            </div>
+          </form>
+        </div>
+      </section>
+    `;
   }
 
   async afterRender() {
@@ -166,7 +154,12 @@ export default class NewPage {
     });
     this.#takenDocumentations = [];
 
-    this.#presenter.showStoryDetail();
+    // SETUP FORM DULU!
+    this.#form = document.getElementById('new-form');
+
+    // Menampilkan map pada form
+    await this.#presenter.showNewFormMap();
+
     this.#setupForm();
   }
 
@@ -175,10 +168,14 @@ export default class NewPage {
     this.#form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      const description = this.#form.elements.namedItem('description').value.trim();
+      if (!description) {
+        alert('Deskripsi tidak boleh kosong!');
+        return;
+      }
+
       const data = {
-        title: this.#form.elements.namedItem('title').value,
-        damageLevel: this.#form.elements.namedItem('damageLevel').value,
-        description: this.#form.elements.namedItem('description').value,
+        description: description,
         evidenceImages: this.#takenDocumentations.map((picture) => picture.blob),
         latitude: this.#form.elements.namedItem('latitude').value,
         longitude: this.#form.elements.namedItem('longitude').value,
@@ -239,6 +236,7 @@ export default class NewPage {
       this.#updateLatLngInput(coordinate.lat, coordinate.lng);
     });
   }
+
   #updateLatLngInput(latitude, longitude) {
     this.#form.elements.namedItem('latitude').value = latitude;
     this.#form.elements.namedItem('longitude').value = longitude;
@@ -270,7 +268,7 @@ export default class NewPage {
   async #addTakenPicture(image) {
     let blob = image;
 
-    if (image instanceof String) {
+    if (typeof image === 'string' || image instanceof String) {
       blob = await convertBase64ToBlob(image, 'image/png');
     }
 
