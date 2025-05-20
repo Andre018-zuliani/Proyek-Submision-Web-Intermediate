@@ -1,6 +1,6 @@
 import NewPresenter from './new-presenter';
 import { convertBase64ToBlob } from '../../utils';
-import * as CityCareAPI from '../../data/api';
+import * as StoriesAPI from '../../data/api';
 import { generateLoaderAbsoluteTemplate } from '../../templates';
 import Camera from '../../utils/camera';
 import Map from '../../utils/map';
@@ -18,10 +18,10 @@ export default class NewPage {
       <section>
         <div class="new-report__header">
           <div class="container">
-            <h1 class="new-report__header__title">Buat Laporan Baru</h1>
+            <h1 class="new-report__header__title">Buat Story Baru</h1>
             <p class="new-report__header__description">
-              Silakan lengkapi formulir di bawah untuk membuat laporan baru.<br>
-              Pastikan laporan yang dibuat adalah valid.
+              Silakan lengkapi formulir di bawah untuk membuat Story baru.<br>
+              Pastikan Story yang dibuat adalah valid.
             </p>
           </div>
         </div>
@@ -31,13 +31,13 @@ export default class NewPage {
         <div class="new-form__container">
           <form id="new-form" class="new-form">
             <div class="form-control">
-              <label for="title-input" class="new-form__title__title">Judul Laporan</label>
+              <label for="title-input" class="new-form__title__title">Judul Story</label>
   
               <div class="new-form__title__container">
                 <input
                   id="title-input"
                   name="title"
-                  placeholder="Masukkan judul laporan"
+                  placeholder="Masukkan judul Story"
                   aria-describedby="title-input-more-info"
                 >
               </div>
@@ -83,7 +83,7 @@ export default class NewPage {
                 <textarea
                   id="description-input"
                   name="description"
-                  placeholder="Masukkan keterangan lengkap laporan. Anda dapat menjelaskan apa kejadiannya, dimana, kapan, dll."
+                  placeholder="Masukkan keterangan lengkap Stories. Anda dapat menjelaskan apa kejadiannya, dimana, kapan, dll."
                 ></textarea>
               </div>
             </div>
@@ -162,11 +162,11 @@ export default class NewPage {
   async afterRender() {
     this.#presenter = new NewPresenter({
       view: this,
-      model: CityCareAPI,
+      model: StoriesAPI,
     });
     this.#takenDocumentations = [];
 
-    this.#presenter.showNewFormMap();
+    this.#presenter.showStoryDetail();
     this.#setupForm();
   }
 

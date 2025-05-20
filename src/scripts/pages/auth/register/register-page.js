@@ -1,5 +1,5 @@
 import RegisterPresenter from './register-presenter';
-import * as CityCareAPI from '../../../data/api';
+import * as StoriesAPI from '../../../data/api';
 
 export default class RegisterPage {
   #presenter = null;

@@ -7,12 +7,12 @@ export default class HomePresenter {
     this.#model = model;
   }
 
-  async showReportsListMap() {
+  async showStoriesListMap() {
     this.#view.showMapLoading();
     try {
       await this.#view.initialMap();
     } catch (error) {
-      console.error('showReportsListMap: error:', error);
+      console.error('showStoriesListMap: error:', error);
     } finally {
       this.#view.hideMapLoading();
     }
@@ -21,25 +21,38 @@ export default class HomePresenter {
   async initialGalleryAndMap() {
     this.#view.showLoading();
     try {
-      await this.showReportsListMap();
+      await this.showStoriesListMap();
 
-      const response = await this.#model.getAllReports();
-      console.log('API response:', response); // <--- tracking response
+      const response = await this.#model.getAllStories();
 
       if (!response.ok) {
         console.error('initialGalleryAndMap: response:', response);
-        this.#view.populateReportsListError(response.message);
+        this.#view.populateStoriesListError(response.message);
         return;
       }
 
-      // Pastikan ambil array yang benar dari response
-      const reports = response.listStory || [];
-      console.log('reports to view:', reports); // <--- tracking reports
+      // Mapping agar ada property location
+      const stories = (response.listStory || [])
+        .filter(
+          (story) =>
+            story &&
+            story.lat !== null &&
+            story.lat !== undefined &&
+            story.lon !== null &&
+            story.lon !== undefined,
+        )
+        .map((story) => ({
+          ...story,
+          location: {
+            latitude: story.lat,
+            longitude: story.lon,
+          },
+        }));
 
-      this.#view.populateReportsList(response.message, reports);
+      this.#view.populateStoriesList(response.message, stories);
     } catch (error) {
       console.error('initialGalleryAndMap: error:', error);
-      this.#view.populateReportsListError(error.message);
+      this.#view.populateStoriesListError(error.message);
     } finally {
       this.#view.hideLoading();
     }

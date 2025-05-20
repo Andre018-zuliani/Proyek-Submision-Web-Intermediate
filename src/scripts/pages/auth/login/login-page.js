@@ -1,5 +1,5 @@
 import LoginPresenter from './login-presenter';
-import * as CityCareAPI from '../../../data/api';
+import * as StoriesAPI from '../../../data/api';
 import * as AuthModel from '../../../utils/auth';
 
 export default class LoginPage {

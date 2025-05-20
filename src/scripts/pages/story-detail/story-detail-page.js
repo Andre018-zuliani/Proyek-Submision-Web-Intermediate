@@ -9,7 +9,7 @@ import {
   generateSaveReportButtonTemplate,
 } from '../../templates';
 import { createCarousel } from '../../utils';
-import ReportDetailPresenter from './report-detail-presenter';
+import ReportDetailPresenter from './story-detail-presenter';
 import { parseActivePathname } from '../../routes/url-parser';
 import * as CityCareAPI from '../../data/api';
 

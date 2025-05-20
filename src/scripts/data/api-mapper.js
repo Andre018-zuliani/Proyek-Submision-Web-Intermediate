@@ -1,13 +1,13 @@
 import Map from '../utils/map';
 
-export async function reportMapper(report) {
+export async function storyMapper(story) {
   return {
-    ...report,
+    ...story,
     location: {
-      ...report.location,
+      ...story.location,
       placeName: await Map.getPlaceNameByCoordinate(
-        report.location.latitude,
-        report.location.longitude,
+        story.location.latitude,
+        story.location.longitude,
       ),
     },
   };

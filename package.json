@@ -1,7 +1,7 @@
 {
   "name": "Storyapp",
   "version": "1.0.0",
-  "description": "Aplikasi Cerita.",
+  "description": "Aplikasi Catatan.",
   "scripts": {
     "build": "webpack --config ./webpack.prod.js",
     "start-dev": "webpack serve --config ./webpack.dev.js",

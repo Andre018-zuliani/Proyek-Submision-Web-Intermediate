@@ -8,6 +8,16 @@ import 'leaflet/dist/leaflet.css';
 import App from './pages/app';
 import Camera from './utils/camera';
 
+async function safeRenderPage(app) {
+  try {
+    await app.renderPage();
+  } catch (error) {
+    console.error('Render page error:', error);
+    document.getElementById('main-content').innerHTML =
+      '<h2>Terjadi kesalahan saat memuat halaman.</h2>';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
     content: document.getElementById('main-content'),
@@ -15,10 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     drawerNavigation: document.getElementById('navigation-drawer'),
     skipLinkButton: document.getElementById('skip-link'),
   });
-  await app.renderPage();
+  await safeRenderPage(app);
 
   window.addEventListener('hashchange', async () => {
-    await app.renderPage();
+    await safeRenderPage(app);
 
     // Stop all active media
     Camera.stopAllStreams();

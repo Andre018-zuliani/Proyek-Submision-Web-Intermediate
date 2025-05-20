@@ -295,3 +295,55 @@ export function generateRemoveReportButtonTemplate() {
     </button>
   `;
 }
+
+export function generateStoriesListEmptyTemplate() {
+  return `
+    <div id="stories-list-empty" class="stories-list__empty">
+      <h2>Tidak ada cerita yang tersedia</h2>
+      <p>Saat ini, tidak ada cerita yang dapat ditampilkan.</p>
+    </div>
+  `;
+}
+
+export function generateStoriesListErrorTemplate(message) {
+  return `
+    <div id="stories-list-error" class="stories-list__error">
+      <h2>Terjadi kesalahan pengambilan daftar cerita</h2>
+      <p>${message ? message : 'Gunakan jaringan lain atau laporkan error ini.'}</p>
+    </div>
+  `;
+}
+
+export function generateStoryItemTemplate({
+  id,
+  name,
+  description,
+  photoUrl,
+  createdAt,
+  location,
+}) {
+  return `
+    <div tabindex="0" class="story-item" data-storyid="${id}">
+      <img class="story-item__image" src="${photoUrl}" alt="${description}">
+      <div class="story-item__body">
+        <div class="story-item__main">
+          <h2 class="story-item__title">${description}</h2>
+          <div class="story-item__more-info">
+            <div class="story-item__createdat">
+              <i class="fas fa-calendar-alt"></i> ${createdAt}
+            </div>
+            <div class="story-item__location">
+              <i class="fas fa-map"></i> ${location.latitude}, ${location.longitude}
+            </div>
+          </div>
+        </div>
+        <div class="story-item__author">
+          Dibuat oleh: ${name}
+        </div>
+        <a class="btn story-item__read-more" href="#/stories/${id}">
+          Selengkapnya <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  `;
+}
