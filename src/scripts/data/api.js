@@ -8,9 +8,9 @@ const ENDPOINTS = {
   MY_USER_INFO: `${BASE_URL}/users/me`,
 
   // Report
-  REPORT_LIST: `${BASE_URL}/reports`,
-  REPORT_DETAIL: (id) => `${BASE_URL}/reports/${id}`,
-  STORE_NEW_REPORT: `${BASE_URL}/reports`,
+  REPORT_LIST: `${BASE_URL}/stories`,
+  REPORT_DETAIL: (id) => `${BASE_URL}/stories/${id}`,
+  STORE_NEW_REPORT: `${BASE_URL}/stories`,
 
   // Report Comment
   REPORT_COMMENTS_LIST: (reportId) => `${BASE_URL}/reports/${reportId}/comments`,
@@ -74,8 +74,7 @@ export async function getMyUserInfo() {
 
 export async function getAllReports() {
   const accessToken = getAccessToken();
-
-  const fetchResponse = await fetch(ENDPOINTS.REPORT_LIST, {
+  const fetchResponse = await fetch('https://story-api.dicoding.dev/v1/stories', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const json = await fetchResponse.json();

@@ -24,6 +24,7 @@ export default class HomePresenter {
       await this.showReportsListMap();
 
       const response = await this.#model.getAllReports();
+      console.log('API response:', response); // <--- tracking response
 
       if (!response.ok) {
         console.error('initialGalleryAndMap: response:', response);
@@ -31,7 +32,11 @@ export default class HomePresenter {
         return;
       }
 
-      this.#view.populateReportsList(response.message, response.data);
+      // Pastikan ambil array yang benar dari response
+      const reports = response.listStory || [];
+      console.log('reports to view:', reports); // <--- tracking reports
+
+      this.#view.populateReportsList(response.message, reports);
     } catch (error) {
       console.error('initialGalleryAndMap: error:', error);
       this.#view.populateReportsListError(error.message);

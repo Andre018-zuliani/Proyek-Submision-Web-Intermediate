@@ -42,7 +42,8 @@ export default class HomePage {
   }
 
   populateReportsList(message, reports) {
-    if (reports.length <= 0) {
+    console.log('populateReportsList:', reports); // <--- tracking di view
+    if (!Array.isArray(reports) || reports.length <= 0) {
       this.populateReportsListEmpty();
       return;
     }

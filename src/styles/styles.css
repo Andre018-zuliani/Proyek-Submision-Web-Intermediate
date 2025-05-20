@@ -226,7 +226,7 @@ form .form-buttons {
   box-sizing: border-box;
   width: 50px;
   height: 50px;
-  border: 6px solid #d4d4d4aa;
+  border: 6px solid #fc0303aa;
   border-bottom-color: var(--primary-color);
   border-radius: 100%;
 
@@ -245,7 +245,7 @@ i.loader-button {
 
 /* HEADER */
 header {
-  background-color: #ffffff;
+  background-color: #d8aaf3;
 
   position: sticky;
   inset-block-start: 0;

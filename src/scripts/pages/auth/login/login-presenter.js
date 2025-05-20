@@ -14,13 +14,13 @@ export default class LoginPresenter {
     try {
       const response = await this.#model.getLogin({ email, password });
 
-      if (!response.ok) {
-        console.error('getLogin: response:', response);
-        this.#view.loginFailed(response.message);
+      if (!response.loginResult || !response.loginResult.token) {
+        console.error('getLogin: No accessToken in response data');
+        this.#view.loginFailed('Token akses tidak ditemukan');
         return;
       }
 
-      this.#authModel.putAccessToken(response.loginResult.accessToken);
+      this.#authModel.putAccessToken(response.loginResult.token);
       this.#view.loginSuccessfully(response.message, response.loginResult);
     } catch (error) {
       console.error('getLogin: error:', error);
