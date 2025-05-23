@@ -1,3 +1,4 @@
+// src/scripts/pages/story-detail/story-detail-presenter.js
 import { storyMapper } from '../../data/api-mapper';
 
 export default class StoryDetailPresenter {
@@ -12,35 +13,26 @@ export default class StoryDetailPresenter {
   }
 
   async showStoryDetail() {
+    console.log('showStoryDetail called'); // Tambahkan ini untuk debugging
     this.#view.showStoryDetailLoading();
     try {
       const response = await this.#apiModel.getStoryById(this.#storyId);
 
       if (!response.ok) {
-        this.#view.populateStoryDetailError(response.message);
+        console.error('showStoryDetail: response:', response);
+        this.#view.populateStoryDetailError(response.message); // Memanggil populateStoryDetailError
         return;
       }
 
       const story = await storyMapper(response.story);
-
-      // Pastikan location selalu ada
-      if (!story.location) {
-        story.location = { latitude: null, longitude: null, placeName: '-' };
-      }
+      console.log('Mapped story:', story); // Log story setelah mapping
 
       this.#view.populateStoryDetailAndInitialMap(response.message, story);
     } catch (error) {
-      this.#view.populateStoryDetailError(error.message);
+      console.error('showStoryDetail: error:', error);
+      this.#view.populateStoryDetailError(error.message); // Memanggil populateStoryDetailError
     } finally {
       this.#view.hideStoryDetailLoading();
     }
-  }
-
-  async showStoryDetailMap() {
-    await this.#view.initialMap();
-  }
-
-  showSaveButton() {
-    this.#view.renderSaveButton();
   }
 }

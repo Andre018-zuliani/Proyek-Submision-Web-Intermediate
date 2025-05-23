@@ -1,67 +1,136 @@
-import { parseActivePathname } from '../../routes/url-parser';
-import StoryDetailPresenter from '../story-detail/story-detail-presenter';
-import * as StoriesAPI from '../../data/api';
+// src/scripts/pages/bookmark/bookmark-page.js
+import {
+  generateStoriesListEmptyTemplate,
+  generateStoriesListErrorTemplate,
+  generateLoaderAbsoluteTemplate,
+  generateStoryItemTemplate,
+} from '../../templates';
+import { storyMapper } from '../../data/api-mapper';
+import Map from '../../utils/map'; // Import Map class
 
 export default class BookmarkPage {
-  #presenter = null;
+  #map = null; // Properti untuk menyimpan instance peta
 
   async render() {
-    return '';
+    return `
+      <section>
+        <div class="stories-list__map__container">
+          <div id="map" class="stories-list__map"></div>
+          <div id="map-loading-container"></div>
+        </div>
+      </section>
+
+      <section class="container">
+        <h1 class="section-title">Story Tersimpan</h1>
+
+        <div class="stories-list__container">
+          <div id="stories-list"></div>
+          <div id="stories-list-loading-container"></div>
+        </div>
+      </section>
+    `;
   }
 
   async afterRender() {
-    const id = parseActivePathname().id;
-    this.#presenter = new StoryDetailPresenter({
-      view: this,
-      apiModel: StoriesAPI,
-      storyId: id,
+    this.showLoading();
+    try {
+      await this.initialMap(); // Panggil initialMap di sini untuk BookmarkPage
+
+      const bookmarkedStoriesRaw = JSON.parse(localStorage.getItem('bookmarkedStories')) || [];
+      const bookmarkedStories = await Promise.all(
+        bookmarkedStoriesRaw.map(async (story) => {
+          // Karena data yang disimpan adalah raw story dari API,
+          // kita perlu me-map-nya lagi dengan storyMapper untuk mendapatkan placeName
+          if (typeof story.lat === 'number' && typeof story.lon === 'number') {
+            return await storyMapper(story);
+          }
+          return {
+            ...story,
+            location: {
+              latitude: null,
+              longitude: null,
+              placeName: 'Lokasi tidak tersedia', // Pesan default jika lokasi tidak ada
+            },
+          };
+        }),
+      );
+
+      this.populateStoriesList(bookmarkedStories);
+    } catch (error) {
+      console.error('Error loading bookmarked stories:', error);
+      this.populateStoriesListError('Terjadi kesalahan saat memuat story tersimpan.');
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  populateStoriesList(stories) {
+    if (stories.length === 0) {
+      this.populateStoriesListEmpty();
+      return;
+    }
+
+    const html = stories.reduce((accumulator, story) => {
+      // Pastikan #map sudah terinisialisasi dan koordinat berupa angka sebelum menambahkan marker
+      if (
+        this.#map &&
+        typeof story.location.latitude === 'number' &&
+        typeof story.location.longitude === 'number'
+      ) {
+        const coordinate = [story.location.latitude, story.location.longitude];
+        const markerOptions = { alt: story.description };
+        const popupOptions = { content: story.description };
+        this.#map.addMarker(coordinate, markerOptions, popupOptions);
+      }
+
+      return accumulator.concat(
+        generateStoryItemTemplate({
+          id: story.id,
+          name: story.name,
+          description: story.description,
+          photoUrl: story.photoUrl,
+          createdAt: story.createdAt,
+          location: story.location, // Ini akan menampilkan 'Lokasi tidak tersedia' jika placeName tidak ada
+        }),
+      );
+    }, '');
+
+    document.getElementById('stories-list').innerHTML = `
+      <div class="stories-list">${html}</div>
+    `;
+  }
+
+  populateStoriesListEmpty() {
+    document.getElementById('stories-list').innerHTML = generateStoriesListEmptyTemplate();
+  }
+
+  populateStoriesListError(message) {
+    document.getElementById('stories-list').innerHTML = generateStoriesListErrorTemplate(message);
+  }
+
+  async initialMap() {
+    // Fungsi ini dipanggil dari afterRender untuk BookmarkPage
+    // untuk menginisialisasi peta.
+    this.#map = await Map.build('#map', {
+      zoom: 10,
+      locate: true, // Akan mencoba menemukan lokasi pengguna sebagai center awal
     });
-    this.#presenter.showStoryDetail();
   }
 
-  // Tambahkan method berikut:
-  showStoryDetailLoading() {
-    // Tampilkan loader di elemen yang sesuai, misal:
-    document.getElementById('main-content').innerHTML = '<div class="loader"></div>';
+  showMapLoading() {
+    document.getElementById('map-loading-container').innerHTML = generateLoaderAbsoluteTemplate();
   }
 
-  populateStoryDetailAndInitialMap(message, story) {
-    // Tampilkan detail story di elemen yang sesuai
-    document.getElementById('main-content').innerHTML = generateReportDetailTemplate({
-      description: story.description,
-      evidenceImages: story.evidenceImages,
-      location: story.location,
-      latitudeLocation: story.location.latitude,
-      longitudeLocation: story.location.longitude,
-      reporterName: story.name || '-',
-      createdAt: story.createdAt,
-    });
-    // ...tambahkan logic map jika perlu...
+  hideMapLoading() {
+    document.getElementById('map-loading-container').innerHTML = '';
   }
 
-  populateStoryDetailError(message) {
-    document.getElementById('main-content').innerHTML = `<div class="error">${message}</div>`;
+  showLoading() {
+    document.getElementById('stories-list-loading-container').innerHTML =
+      generateLoaderAbsoluteTemplate();
   }
 
-  showAnimatedNotification(message) {
-    // Hapus notifikasi lama jika ada
-    let notif = document.getElementById('animated-notification');
-    if (notif) notif.remove();
-
-    notif = document.createElement('div');
-    notif.id = 'animated-notification';
-    notif.className = 'animated-notification';
-    notif.innerHTML = `<i class="far fa-bell"></i> ${message}`;
-
-    document.body.appendChild(notif);
-
-    // Trigger animasi
-    setTimeout(() => notif.classList.add('show'), 10);
-
-    // Hilangkan setelah 2.5 detik
-    setTimeout(() => {
-      notif.classList.remove('show');
-      setTimeout(() => notif.remove(), 400);
-    }, 2500);
+  hideLoading() {
+    document.getElementById('stories-list-loading-container').innerHTML = '';
   }
 }
