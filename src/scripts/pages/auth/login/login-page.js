@@ -41,7 +41,7 @@ export default class LoginPage {
   async afterRender() {
     this.#presenter = new LoginPresenter({
       view: this,
-      model: CityCareAPI,
+      model: StoriesAPI,
       authModel: AuthModel,
     });
 

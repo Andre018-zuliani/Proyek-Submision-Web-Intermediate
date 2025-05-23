@@ -20,26 +20,18 @@ export default class NewPresenter {
     }
   }
 
-  async postNewReport({ title, damageLevel, description, evidenceImages, latitude, longitude }) {
+  async postNewReport({ description, evidenceImages, latitude, longitude }) {
     this.#view.showSubmitLoadingButton();
     try {
+      // Dicoding Story API hanya menerima satu foto, bukan array
+      const photo = evidenceImages && evidenceImages.length > 0 ? evidenceImages[0] : null;
       const data = {
-        title: title,
-        damageLevel: damageLevel,
-        description: description,
-        evidenceImages: evidenceImages,
-        latitude: latitude,
-        longitude: longitude,
+        description,
+        photo,
+        lat: latitude,
+        lon: longitude,
       };
-      const response = await this.#model.storeNewStory(data);
-
-      if (!response.ok) {
-        console.error('postNewReport: response:', response);
-        this.#view.storeFailed(response.message);
-        return;
-      }
-
-      this.#view.storeSuccessfully(response.message, response.data);
+      await this.#model.storeNewStory(data);
     } catch (error) {
       console.error('postNewReport: error:', error);
       this.#view.storeFailed(error.message);

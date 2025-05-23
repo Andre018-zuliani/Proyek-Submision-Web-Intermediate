@@ -67,7 +67,7 @@ export default class HomePage {
       return accumulator.concat(
         generateReportItemTemplate({
           ...report,
-          reporterName: report.reporter.name,
+          reporterName: report.name,
         }),
       );
     }, '');
@@ -115,9 +115,6 @@ export default class HomePage {
       return;
     }
 
-    // Log stories for debugging
-    console.log('Stories:', stories);
-
     const html = stories.reduce((accumulator, story) => {
       // Skip undefined or malformed stories
       if (!story || !story.name) {
@@ -141,7 +138,7 @@ export default class HomePage {
     }, '');
 
     document.getElementById('stories-list').innerHTML = `
-      <div class="stories-list">${html}</div>
+      <div class="stories-list__grid">${html}</div>
     `;
   }
 
@@ -179,5 +176,8 @@ export default class HomePage {
 
   viewStoryDetail() {
     this.#presenter.showStoryDetail();
+  }
+  viewStoryDetailMap() {
+    this.#presenter.showStoryDetailMap();
   }
 }

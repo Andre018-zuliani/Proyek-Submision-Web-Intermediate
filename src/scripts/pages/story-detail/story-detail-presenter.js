@@ -17,21 +17,30 @@ export default class StoryDetailPresenter {
       const response = await this.#apiModel.getStoryById(this.#storyId);
 
       if (!response.ok) {
-        console.error('showStoryDetail: response:', response);
         this.#view.populateStoryDetailError(response.message);
         return;
       }
 
-      // Gunakan storyMapper jika memang perlu normalisasi
       const story = await storyMapper(response.story);
-      console.log(story); // for debugging, boleh dihapus jika sudah yakin
+
+      // Pastikan location selalu ada
+      if (!story.location) {
+        story.location = { latitude: null, longitude: null, placeName: '-' };
+      }
 
       this.#view.populateStoryDetailAndInitialMap(response.message, story);
     } catch (error) {
-      console.error('showStoryDetail: error:', error);
       this.#view.populateStoryDetailError(error.message);
     } finally {
       this.#view.hideStoryDetailLoading();
     }
+  }
+
+  async showStoryDetailMap() {
+    await this.#view.initialMap();
+  }
+
+  showSaveButton() {
+    this.#view.renderSaveButton();
   }
 }

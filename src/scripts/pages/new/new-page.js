@@ -12,6 +12,7 @@ export default class NewPage {
   #isCameraOpen = false;
   #takenDocumentations = [];
   #map = null;
+  #draggableMarker = null;
 
   async render() {
     return `
@@ -39,39 +40,7 @@ export default class NewPage {
                   aria-describedby="title-input-more-info"
                 >
               </div>
-              <div id="title-input-more-info">Pastikan judul laporan dibuat dengan jelas dan deskriptif dalam 1 kalimat.</div>
-            </div>
-            <div class="form-control">
-              <div class="new-form__damage-level__title">Tingkat Kerusakan</div>
-              <div class="new-form__damage-level__container">
-                <div class="new-form__damage-level__minor__container">
-                  <input id="damage-level-minor-input" type="radio" name="damageLevel" value="minor">
-                  <label for="damage-level-minor-input">
-                    Rendah
-                    <span title="Contoh: Lubang kecil di jalan, kerusakan ringan pada tanda lalu lintas, dll.">
-                      <i class="far fa-question-circle"></i>
-                    </span>
-                  </label>
-                </div>
-                <div class="new-form__damage-level__moderate__container">
-                  <input id="damage-level-moderate-input" type="radio" name="damageLevel" value="moderate">
-                  <label for="damage-level-moderate-input">
-                    Sedang
-                    <span title="Contoh: Jalan retak besar, trotoar amblas, lampu jalan mati, dll.">
-                      <i class="far fa-question-circle"></i>
-                    </span>
-                  </label>
-                </div>
-                <div class="new-form__damage-level__severe__container">
-                  <input id="damage-level-severe-input" type="radio" name="damageLevel" value="severe">
-                  <label for="damage-level-severe-input">
-                    Berat
-                    <span title="Contoh: Jembatan ambruk, tiang listrik roboh, longsor yang menutup jalan, dll.">
-                      <i class="far fa-question-circle"></i>
-                    </span>
-                  </label>
-                </div>
-              </div>
+              <div id="title-input-more-info">Pastikan judul Story dibuat dengan jelas dan deskriptif dalam 1 kalimat.</div>
             </div>
             <div class="form-control">
               <label for="description-input" class="new-form__description__title">Keterangan</label>
@@ -137,7 +106,7 @@ export default class NewPage {
             </div>
             <div class="form-buttons">
               <span id="submit-button-container">
-                <button class="btn" type="submit">Buat Laporan</button>
+                <button class="btn" type="submit">Buat Story</button>
               </span>
               <a class="btn btn-outline" href="#/">Batal</a>
             </div>
@@ -224,14 +193,14 @@ export default class NewPage {
 
     // Preparing marker for select coordinate
     const centerCoordinate = this.#map.getCenter();
-    const draggableMarker = this.#map.addMarker(
+    this.#draggableMarker = this.#map.addMarker(
       [centerCoordinate.latitude, centerCoordinate.longitude],
       { draggable: 'true' },
     );
 
     this.#updateLatLngInput(centerCoordinate.latitude, centerCoordinate.longitude);
 
-    draggableMarker.addEventListener('move', (event) => {
+    this.#draggableMarker.addEventListener('move', (event) => {
       const coordinate = event.target.getLatLng();
       this.#updateLatLngInput(coordinate.lat, coordinate.lng);
     });
@@ -258,7 +227,7 @@ export default class NewPage {
     });
 
     this.#map.addMapEventListener('click', (event) => {
-      draggableMarker.setLatLng(event.latlng);
+      this.#draggableMarker.setLatLng(event.latlng);
 
       // Keep center with user view
       event.sourceTarget.flyTo(event.latlng);
@@ -353,14 +322,14 @@ export default class NewPage {
   showSubmitLoadingButton() {
     document.getElementById('submit-button-container').innerHTML = `
       <button class="btn" type="submit" disabled>
-        <i class="fas fa-spinner loader-button"></i> Buat Laporan
+        <i class="fas fa-spinner loader-button"></i> Buat Story
       </button>
     `;
   }
 
   hideSubmitLoadingButton() {
     document.getElementById('submit-button-container').innerHTML = `
-      <button class="btn" type="submit">Buat Laporan</button>
+      <button class="btn" type="submit">Buat Story</button>
     `;
   }
 }

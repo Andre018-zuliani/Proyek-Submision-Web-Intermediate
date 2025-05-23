@@ -1,90 +1,64 @@
 import {
-  generateCommentsListEmptyTemplate,
-  generateCommentsListErrorTemplate,
   generateLoaderAbsoluteTemplate,
   generateRemoveReportButtonTemplate,
-  generateReportCommentItemTemplate,
   generateReportDetailErrorTemplate,
   generateReportDetailTemplate,
   generateSaveReportButtonTemplate,
 } from '../../templates';
 import { createCarousel } from '../../utils';
-import ReportDetailPresenter from './story-detail-presenter';
+import StoryDetailPresenter from './story-detail-presenter';
+import * as StoriesAPI from '../../data/api';
 import { parseActivePathname } from '../../routes/url-parser';
-import * as CityCareAPI from '../../data/api';
+import Map from '../../utils/map';
 
-export default class ReportDetailPage {
+export default class StoryDetailPage {
   #presenter = null;
   #form = null;
   #map = null;
 
   async render() {
     return `
-      <section>
-        <div class="report-detail__container">
-          <div id="report-detail" class="report-detail"></div>
-          <div id="report-detail-loading-container"></div>
-        </div>
-      </section>
-      
       <section class="container">
-        <hr>
-        <div class="report-detail__comments__container">
-          <div class="report-detail__comments-form__container">
-            <h2 class="report-detail__comments-form__title">Beri Tanggapan</h2>
-            <form id="comments-list-form" class="report-detail__comments-form__form">
-              <textarea name="body" placeholder="Beri tanggapan terkait laporan."></textarea>
-              <div id="submit-button-container">
-                <button class="btn" type="submit">Tanggapi</button>
-              </div>
-            </form>
-          </div>
-          <hr>
-          <div class="report-detail__comments-list__container">
-            <div id="report-detail-comments-list"></div>
-            <div id="comments-list-loading-container"></div>
-          </div>
-        </div>
+        <div id="report-detail"></div>
+        <div id="save-actions-container"></div>
+        <div id="map-loading-container"></div>
       </section>
     `;
   }
 
   async afterRender() {
-    this.#presenter = new ReportDetailPresenter(parseActivePathname().id, {
+    const id = parseActivePathname().id;
+    this.#presenter = new StoryDetailPresenter({
       view: this,
-      apiModel: CityCareAPI,
+      apiModel: StoriesAPI,
+      storyId: id,
     });
-
-    this.#setupForm();
-
-    this.#presenter.showReportDetail();
-    this.#presenter.getCommentsList();
+    this.#presenter.showStoryDetail();
   }
 
-  async populateReportDetailAndInitialMap(message, report) {
+  async populateStoryDetailAndInitialMap(message, story) {
     document.getElementById('report-detail').innerHTML = generateReportDetailTemplate({
-      title: report.title,
-      description: report.description,
-      damageLevel: report.damageLevel,
-      evidenceImages: report.evidenceImages,
-      location: report.location,
-      latitudeLocation: report.location.latitude,
-      longitudeLocation: report.location.longitude,
-      reporterName: report.reporter.name,
-      createdAt: report.createdAt,
+      description: story.description,
+      evidenceImages: story.evidenceImages,
+      location: story.location,
+      latitudeLocation: story.location.latitude,
+      longitudeLocation: story.location.longitude,
+      reporterName: story.name || '-',
+      createdAt: story.createdAt,
     });
 
     // Carousel images
     createCarousel(document.getElementById('images'));
 
     // Map
-    await this.#presenter.showReportDetailMap();
+    await this.#presenter.showStoryDetailMap();
+
     if (this.#map) {
-      const reportCoordinate = [report.location.latitude, report.location.longitude];
-      const markerOptions = { alt: report.title };
-      const popupOptions = { content: report.title };
-      this.#map.changeCamera(reportCoordinate);
-      this.#map.addMarker(reportCoordinate, markerOptions, popupOptions);
+      const storyCoordinate = [story.location.latitude, story.location.longitude];
+      const markerOptions = { alt: story.title };
+      const popupOptions = { content: story.title };
+      this.#map.changeCamera(storyCoordinate);
+      this.#map.addMarker(storyCoordinate, markerOptions, popupOptions);
     }
 
     // Actions buttons
@@ -92,74 +66,19 @@ export default class ReportDetailPage {
     this.addNotifyMeEventListener();
   }
 
-  populateReportDetailError(message) {
+  populateStoryDetailError(message) {
     document.getElementById('report-detail').innerHTML = generateReportDetailErrorTemplate(message);
   }
 
-  populateReportDetailComments(message, comments) {
-    if (comments.length <= 0) {
-      this.populateCommentsListEmpty();
-      return;
-    }
-
-    const html = comments.reduce(
-      (accumulator, comment) =>
-        accumulator.concat(
-          generateReportCommentItemTemplate({
-            photoUrlCommenter: comment.commenter.photoUrl,
-            nameCommenter: comment.commenter.name,
-            body: comment.body,
-          }),
-        ),
-      '',
-    );
-
-    document.getElementById('report-detail-comments-list').innerHTML = `
-      <div class="report-detail__comments-list">${html}</div>
-    `;
+  // Tambahkan di class StoryDetailPage
+  showStoryDetailLoading() {
+    // Implementasi loading indicator
+    document.getElementById('report-detail').innerHTML = generateLoaderAbsoluteTemplate();
   }
 
-  populateCommentsListEmpty() {
-    document.getElementById('report-detail-comments-list').innerHTML =
-      generateCommentsListEmptyTemplate();
-  }
-
-  populateCommentsListError(message) {
-    document.getElementById('report-detail-comments-list').innerHTML =
-      generateCommentsListErrorTemplate(message);
-  }
-
-  async initialMap() {
-    this.#map = await Map.build('#map', {
-      zoom: 15,
-    });
-  }
-
-  #setupForm() {
-    this.#form = document.getElementById('comments-list-form');
-    this.#form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const data = {
-        body: this.#form.elements.namedItem('body').value,
-      };
-      await this.#presenter.postNewComment(data);
-    });
-  }
-
-  postNewCommentSuccessfully(message) {
-    console.log(message);
-
-    this.#presenter.getCommentsList();
-    this.clearForm();
-  }
-
-  postNewCommentFailed(message) {
-    alert(message);
-  }
-
-  clearForm() {
-    this.#form.reset();
+  hideStoryDetailLoading() {
+    // Tidak perlu implementasi khusus karena populateStoryDetailAndInitialMap
+    // akan mengganti konten secara otomatis
   }
 
   renderSaveButton() {
@@ -167,7 +86,7 @@ export default class ReportDetailPage {
       generateSaveReportButtonTemplate();
 
     document.getElementById('report-detail-save').addEventListener('click', async () => {
-      alert('Fitur simpan laporan akan segera hadir!');
+      this.showAnimatedNotification('Fitur simpan laporan akan segera hadir!');
     });
   }
 
@@ -176,53 +95,41 @@ export default class ReportDetailPage {
       generateRemoveReportButtonTemplate();
 
     document.getElementById('report-detail-remove').addEventListener('click', async () => {
-      alert('Fitur simpan laporan akan segera hadir!');
+      this.showAnimatedNotification('Fitur simpan laporan akan segera hadir!');
     });
   }
 
   addNotifyMeEventListener() {
     document.getElementById('report-detail-notify-me').addEventListener('click', () => {
-      alert('Fitur notifikasi laporan akan segera hadir!');
+      this.showAnimatedNotification('Fitur notifikasi laporan akan segera hadir!');
     });
   }
 
-  showReportDetailLoading() {
-    document.getElementById('report-detail-loading-container').innerHTML =
-      generateLoaderAbsoluteTemplate();
+  async initialMap() {
+    this.#map = await Map.build('#map', {
+      zoom: 15,
+    });
   }
 
-  hideReportDetailLoading() {
-    document.getElementById('report-detail-loading-container').innerHTML = '';
-  }
+  showAnimatedNotification(message) {
+    // Hapus notifikasi lama jika ada
+    let notif = document.getElementById('animated-notification');
+    if (notif) notif.remove();
 
-  showMapLoading() {
-    document.getElementById('map-loading-container').innerHTML = generateLoaderAbsoluteTemplate();
-  }
+    notif = document.createElement('div');
+    notif.id = 'animated-notification';
+    notif.className = 'animated-notification';
+    notif.innerHTML = `<i class="far fa-bell"></i> ${message}`;
 
-  hideMapLoading() {
-    document.getElementById('map-loading-container').innerHTML = '';
-  }
+    document.body.appendChild(notif);
 
-  showCommentsLoading() {
-    document.getElementById('comments-list-loading-container').innerHTML =
-      generateLoaderAbsoluteTemplate();
-  }
+    // Trigger animasi
+    setTimeout(() => notif.classList.add('show'), 10);
 
-  hideCommentsLoading() {
-    document.getElementById('comments-list-loading-container').innerHTML = '';
-  }
-
-  showSubmitLoadingButton() {
-    document.getElementById('submit-button-container').innerHTML = `
-      <button class="btn" type="submit" disabled>
-        <i class="fas fa-spinner loader-button"></i> Tanggapi
-      </button>
-    `;
-  }
-
-  hideSubmitLoadingButton() {
-    document.getElementById('submit-button-container').innerHTML = `
-      <button class="btn" type="submit">Tanggapi</button>
-    `;
+    // Hilangkan setelah 2.5 detik
+    setTimeout(() => {
+      notif.classList.remove('show');
+      setTimeout(() => notif.remove(), 400);
+    }, 2500);
   }
 }

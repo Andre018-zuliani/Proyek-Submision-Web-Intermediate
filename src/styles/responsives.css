@@ -143,3 +143,32 @@
     height: 600px;
   }
 }
+
+/* Stories List */
+.stories-list__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 kolom */
+  gap: 24px; /* jarak antar item, bisa diubah */
+  margin-top: 24px;
+}
+
+.story-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Tambahkan styling lain sesuai kebutuhan */
+}
+
+@media (max-width: 900px) {
+  .stories-list__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .stories-list__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -693,16 +693,10 @@ header {
   gap: 10px;
 }
 
-/* Report comments section */
-.report-detail__comments__container {
-  max-width: 800px;
-  margin-block: 30px;
-  margin-inline: auto;
-}
 
-/* Report comments form */
-.report-detail__comments-form__container {
-  margin-block: 20px 40px;
+.report-detail__comments-form__title {
+  margin-block-end: 12px;
+  font-size: 1.5rem;
 }
 
 .report-detail__comments-form__form textarea {
@@ -749,7 +743,6 @@ header {
   width: 50px;
   height: 50px;
   border-radius: 100%;
-
   align-self: start;
 }
 
@@ -761,18 +754,8 @@ header {
   margin-block-end: 8px;
   display: flex;
   gap: 12px;
-
-  color: #555;
 }
 
-.report-detail__comment-item__body__author {
-  font-weight: 600;
-  color: #09090b;
-}
-
-.report-detail__comment-item__body__text {
-  color: #5d5d5d;
-}
 /* Report comments section */
 /* END OF DETAIL PAGE */
 
@@ -934,4 +917,29 @@ footer {
 
 .copyright {
   text-align: center;
+}
+
+/* Animasi notifikasi */
+.animated-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: #ff9800;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.animated-notification.show {
+  opacity: 1;
+  transform: translateY(0);
 }

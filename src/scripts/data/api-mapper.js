@@ -4,11 +4,9 @@ export async function storyMapper(story) {
   return {
     ...story,
     location: {
-      ...story.location,
-      placeName: await Map.getPlaceNameByCoordinate(
-        story.location.latitude,
-        story.location.longitude,
-      ),
+      latitude: story.lat ?? null,
+      longitude: story.lon ?? null,
+      placeName: await Map.getPlaceNameByCoordinate(story.lat, story.lon),
     },
   };
 }
